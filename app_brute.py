@@ -15,6 +15,7 @@ def clean_name(full_name):
     Cleans the name according to the rule:
     Dela Cruz, Juan Miguel Zerge -> Dela Cruz, Juan Miguel
     dela cruz, juan -> dela cruz, juan
+    Also handles multi-word middle names like 'Dela Cruz', 'De Guzman', 'De Los Santos'
     """
     if pd.isna(full_name) or not isinstance(full_name, str):
         return None
@@ -29,8 +30,16 @@ def clean_name(full_name):
     first_names = first_names_part.split()
     
     if len(first_names) >= 2:
-        # Remove the last word (middle name)
-        cleaned_first_names = " ".join(first_names[:-1])
+        # Check for 3-word middle name (e.g., DE LOS SANTOS)
+        if len(first_names) >= 4 and first_names[-3].upper() == "DE" and first_names[-2].upper() in ["LOS", "LAS", "LA"]:
+            cleaned_first_names = " ".join(first_names[:-3])
+        # Check for 2-word middle name (e.g., DELA CRUZ, DE GUZMAN, SAN JOSE)
+        elif len(first_names) >= 3 and first_names[-2].upper() in ["DELA", "DE", "DEL", "SAN", "STA", "SANTA"]:
+            cleaned_first_names = " ".join(first_names[:-2])
+        else:
+            # Standard 1-word middle name
+            cleaned_first_names = " ".join(first_names[:-1])
+            
         return f"{surname}, {cleaned_first_names}"
     else:
         # No middle name, keep as is
