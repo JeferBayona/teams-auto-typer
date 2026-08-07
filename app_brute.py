@@ -215,6 +215,15 @@ class TeamsBruteApp(tk.Tk):
                 # Tiny wait before the next name to ensure Teams processes the selection
                 time.sleep(0.5)
                 
+                # CLEAR the text box in case the name was NOT found.
+                # If the name WAS found, the text box is empty and this does nothing.
+                # If the name was NOT found, this selects the text and deletes it.
+                # We use Shift+Home and Delete because Delete (forward delete) does not 
+                # delete chips in Teams if the box is empty, whereas Backspace might.
+                pyautogui.hotkey('shift', 'home')
+                pyautogui.press('delete')
+                time.sleep(0.2)
+                
             # Auto Add logic
             if auto_add:
                 self.log(f"\nTyping complete. Automatically pressing 'Add' (Tabbing {tabs_count} times)...")
