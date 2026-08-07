@@ -77,7 +77,7 @@ class TeamsBruteApp(tk.Tk):
         
         tk.Label(frame_settings, text="Excel Name Column Header:").grid(row=0, column=0, sticky='w', padx=5, pady=5)
         self.entry_column = tk.Entry(frame_settings, width=40)
-        self.entry_column.insert(0, "Name")
+        self.entry_column.insert(0, "StudentName")
         self.entry_column.grid(row=0, column=1, padx=5, pady=5)
         
         tk.Label(frame_settings, text="Wait Time (seconds) per name:\n(Time allowed for Teams to search)").grid(row=1, column=0, sticky='w', padx=5, pady=5)
