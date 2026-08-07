@@ -3,6 +3,9 @@ from tkinter import filedialog, messagebox, scrolledtext
 import pandas as pd
 import openpyxl
 import xlrd
+import lxml
+import html5lib
+import bs4
 import pyautogui
 import threading
 import time
@@ -151,7 +154,13 @@ class TeamsBruteApp(tk.Tk):
             self.log(f"Reading Excel file: {os.path.basename(self.filepath)}")
             try:
                 if self.filepath.lower().endswith('.xls'):
-                    df = pd.read_excel(self.filepath, engine='xlrd')
+                    try:
+                        df = pd.read_excel(self.filepath, engine='xlrd')
+                    except Exception as e:
+                        # Fallback to HTML if it's an HTML file saved as .xls
+                        self.log("xlrd failed, attempting to read as HTML table...")
+                        dfs = pd.read_html(self.filepath)
+                        df = dfs[0]
                 else:
                     df = pd.read_excel(self.filepath, engine='openpyxl')
             except Exception as e:
