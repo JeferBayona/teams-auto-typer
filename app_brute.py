@@ -3,7 +3,6 @@ from tkinter import filedialog, messagebox, scrolledtext
 import pandas as pd
 import openpyxl
 import xlrd
-import lxml
 import html5lib
 import bs4
 import pyautogui

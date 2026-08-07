@@ -1,0 +1,87 @@
+<div>
+	<table cellspacing="0" rules="all" border="1" style="border-collapse:collapse;">
+		<tr>
+			<th scope="col">StudentName</th><th scope="col">Gender</th><th scope="col">YearLevel</th><th scope="col">ProgramShortName</th>
+		</tr><tr>
+			<td>CATENZA, ANGELICA PACARDO</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>TEMPLADO, JOFERD SVEN  SAYSAY</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>BALILA, JOSE EDGARDO VILLACUATRO</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>TA&#209;ON, GABRIEL ESPARAS</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>ALMAZAR, TRISHA MAE INFANTE</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>VILLACURA, ASHLEY CAMILLE PARADERO</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>PURISIMA, JOHN KEVIN NORILLA</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>BARROQUI&#209;A, FLOR ANDREA TELLAIN</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>NUALDA, ASHLEY NICOLE ESCORDIAL</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>COLASISANG, CASSANDRA JANE LASAN</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>RAMOS, GEOFF ORLAN HONRADO</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>OGATIS, CYRIL CALAGO</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>DE ASIS, DAVE EMERSON GALILA</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>YANSON, MA. CARLYN ANGELOU BIONAT</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>ORAIZ, ZACK EZEKIEL VILLAFUERTE</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>VILLA, MAR LAWRENCE LABANIEGO</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>MIRASOL, GEORGE GABRIEL GATILOGO</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>CASTAN~ARES, CEDRICK JUAREZ</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>CABALONGA, ELLA FERN NAVARTE</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>GONZALES, XELINE RIAN REGIDOR</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>VALENCIA, RAYVER JOHN VISCARA</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>LABAYEN, KIAN VINCENT GENOVES</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>PANES, CLEM LOUISE ROSAL</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>NAGANDA, JACKIE MANALO</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>ESLABON, PHILIP ERAMIS</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>MONTA&#209;O, BRYAN PADILLA</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>LAQUINAY, JOHANN VINCE CURATO</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>CARBAQUIL, PRYLX GALE</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>GABARAN, KRISTA GUMAWA</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>ERASMO, GLEENDYL MYRO TENIEDO</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>CAPANGYARIHAN, CHARISSE VISTAR</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>SILLORAR, NICOLE KATE ABILLAR</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>PARCON, EZEKIEL SOLDEVILLA</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>DELOS REYES, KARL CHRISTIAN ORALDE</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>BARGASO, REA CA&#209;ETE</td><td>F</td><td>3</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>LOPEZ, ANGEL MAE CALIMUTAN</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>OCAMPO, JANELLE DESTACAMENTO</td><td>F</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>MIRANDA, SILMARCH GURICO</td><td>M</td><td>2</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>PEDAN, CLARK VINCENT REBADOMIA</td><td>M</td><td>1</td><td>BS Civil Engineering          </td>
+		</tr><tr>
+			<td>POLINO, KIAN JOSHUA FAUSTO</td><td>M</td><td>2</td><td>BS Civil Engineering          </td>
+		</tr>
+	</table>
+</div>
