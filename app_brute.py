@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, scrolledtext
 import pandas as pd
+import openpyxl
+import xlrd
 import pyautogui
 import threading
 import time
