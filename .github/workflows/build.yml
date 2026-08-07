@@ -29,18 +29,18 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        pyinstaller --noconfirm --onedir --windowed --name "TeamsAutoTyper" app_brute.py
+        pyinstaller --noconfirm --onefile --windowed --name "TeamsAutoTyper" app_brute.py
 
     - name: Upload Artifact (Windows)
       if: runner.os == 'Windows'
       uses: actions/upload-artifact@v3
       with:
-        name: TeamsAutoTyper-Windows
-        path: dist/TeamsAutoTyper
+        name: TeamsAutoTyper-Windows.exe
+        path: dist/TeamsAutoTyper.exe
 
     - name: Upload Artifact (macOS)
       if: runner.os == 'macOS'
       uses: actions/upload-artifact@v3
       with:
-        name: TeamsAutoTyper-macOS
+        name: TeamsAutoTyper-macOS.app
         path: dist/TeamsAutoTyper.app
