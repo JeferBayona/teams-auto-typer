@@ -150,7 +150,10 @@ class TeamsBruteApp(tk.Tk):
             # 1. Read Excel
             self.log(f"Reading Excel file: {os.path.basename(self.filepath)}")
             try:
-                df = pd.read_excel(self.filepath)
+                if self.filepath.lower().endswith('.xls'):
+                    df = pd.read_excel(self.filepath, engine='xlrd')
+                else:
+                    df = pd.read_excel(self.filepath, engine='openpyxl')
             except Exception as e:
                 self.log(f"Failed to read Excel file: {e}")
                 self.btn_run.config(state='normal')
