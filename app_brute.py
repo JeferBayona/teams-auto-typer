@@ -158,7 +158,7 @@ class TeamsBruteApp(tk.Tk):
                     except Exception as e:
                         # Fallback to HTML if it's an HTML file saved as .xls
                         self.log("xlrd failed, attempting to read as HTML table...")
-                        dfs = pd.read_html(self.filepath)
+                        dfs = pd.read_html(self.filepath, flavor='html5lib')
                         df = dfs[0]
                 else:
                     df = pd.read_excel(self.filepath, engine='openpyxl')
