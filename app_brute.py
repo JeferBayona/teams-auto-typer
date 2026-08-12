@@ -53,7 +53,7 @@ class TeamsBruteApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Teams Auto-Typer (Brute Force)")
-        self.geometry("600x650")
+        self.geometry("600x750")
         
         self.filepath = None
         self.abort_flag = False
@@ -103,6 +103,20 @@ class TeamsBruteApp(tk.Tk):
         self.entry_tabs = tk.Entry(frame_auto, width=5)
         self.entry_tabs.insert(0, "1")
         self.entry_tabs.grid(row=1, column=1, sticky='w', padx=5, pady=5)
+        
+        self.auto_close_var = tk.BooleanVar(value=True)
+        chk_auto_close = tk.Checkbutton(frame_auto, text="Automatically press the 'Close' button on the final screen", variable=self.auto_close_var)
+        chk_auto_close.grid(row=2, column=0, columnspan=2, sticky='w', padx=5, pady=5)
+        
+        tk.Label(frame_auto, text="Wait time before pressing Close (seconds):").grid(row=3, column=0, sticky='w', padx=5, pady=5)
+        self.entry_close_delay = tk.Entry(frame_auto, width=5)
+        self.entry_close_delay.insert(0, "5")
+        self.entry_close_delay.grid(row=3, column=1, sticky='w', padx=5, pady=5)
+        
+        tk.Label(frame_auto, text="Number of 'Tab' presses to reach Close button:").grid(row=4, column=0, sticky='w', padx=5, pady=5)
+        self.entry_close_tabs = tk.Entry(frame_auto, width=5)
+        self.entry_close_tabs.insert(0, "1")
+        self.entry_close_tabs.grid(row=4, column=1, sticky='w', padx=5, pady=5)
 
         # Fail Safe Instructions
         frame_safe = tk.LabelFrame(self, text="⚠️ EMERGENCY STOP ⚠️", fg="red")
@@ -158,6 +172,18 @@ class TeamsBruteApp(tk.Tk):
             messagebox.showerror("Error", "Number of tabs must be an integer.")
             return
             
+        try:
+            close_delay = float(self.entry_close_delay.get().strip())
+        except ValueError:
+            messagebox.showerror("Error", "Close wait time must be a number.")
+            return
+            
+        try:
+            close_tabs = int(self.entry_close_tabs.get().strip())
+        except ValueError:
+            messagebox.showerror("Error", "Number of tabs for Close must be an integer.")
+            return
+            
         self.btn_run.config(state='disabled')
         self.btn_abort.config(state='normal')
         self.abort_flag = False
@@ -166,9 +192,9 @@ class TeamsBruteApp(tk.Tk):
         del_method = self.del_method_var.get()
         
         # Run in a separate thread so UI doesn't freeze
-        threading.Thread(target=self.run_process, args=(name_col, delay, self.auto_add_var.get(), tabs_count, del_method), daemon=True).start()
+        threading.Thread(target=self.run_process, args=(name_col, delay, self.auto_add_var.get(), tabs_count, del_method, self.auto_close_var.get(), close_delay, close_tabs), daemon=True).start()
 
-    def run_process(self, name_col, delay, auto_add, tabs_count, del_method):
+    def run_process(self, name_col, delay, auto_add, tabs_count, del_method, auto_close, close_delay, close_tabs):
         try:
             # 1. Read Excel
             self.log(f"Reading Excel file: {os.path.basename(self.filepath)}")
@@ -268,7 +294,28 @@ class TeamsBruteApp(tk.Tk):
                 
                 pyautogui.press('enter')
                 self.log("✅ Pressed Add!")
-                messagebox.showinfo("Done", "Typing complete and 'Add' was pressed automatically!")
+                
+                if auto_close and not self.abort_flag:
+                    self.log(f"Waiting {close_delay} seconds for MS Teams to process the additions...")
+                    # Loop sleep to allow abort during wait
+                    wait_time = 0
+                    while wait_time < close_delay:
+                        if self.abort_flag:
+                            self.log("\n❌ PROCESS ABORTED BY USER!")
+                            break
+                        time.sleep(1)
+                        wait_time += 1
+                        
+                    if not self.abort_flag:
+                        self.log(f"Pressing 'Close' (Tabbing {close_tabs} times)...")
+                        for _ in range(close_tabs):
+                            pyautogui.press('tab')
+                            time.sleep(0.2)
+                        pyautogui.press('enter')
+                        self.log("✅ Pressed Close!")
+                        messagebox.showinfo("Done", "Typing complete! 'Add' and 'Close' were pressed automatically!")
+                else:
+                    messagebox.showinfo("Done", "Typing complete and 'Add' was pressed automatically!")
             elif not self.abort_flag:
                 self.log("\n✅ ALL DONE!")
                 self.log("Please review the selected names in Teams, and manually click the 'Add' button to finish.")
