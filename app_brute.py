@@ -56,6 +56,7 @@ class TeamsBruteApp(tk.Tk):
         self.geometry("600x650")
         
         self.filepath = None
+        self.abort_flag = False
         
         self.create_widgets()
 
@@ -84,6 +85,12 @@ class TeamsBruteApp(tk.Tk):
         self.entry_delay.insert(0, "2.5")
         self.entry_delay.grid(row=1, column=1, sticky='w', padx=5, pady=5)
         
+        tk.Label(frame_settings, text="Not-Found Deletion Method:").grid(row=2, column=0, sticky='w', padx=5, pady=5)
+        self.del_method_var = tk.StringVar(value="Shift+Home (Default)")
+        del_methods = ["Shift+Home (Default)", "Backspaces (Count)", "Ctrl+A, Delete", "None"]
+        self.del_menu = tk.OptionMenu(frame_settings, self.del_method_var, *del_methods)
+        self.del_menu.grid(row=2, column=1, sticky='w', padx=5, pady=5)
+        
         # Auto-Add Settings
         frame_auto = tk.LabelFrame(self, text="Automation Actions")
         frame_auto.pack(pady=5, padx=10, fill='x')
@@ -107,9 +114,19 @@ class TeamsBruteApp(tk.Tk):
         self.log_text = scrolledtext.ScrolledText(self, height=10, state='disabled')
         self.log_text.pack(padx=10, pady=5, fill='both', expand=True)
         
-        # Action Button
-        self.btn_run = tk.Button(self, text="START TYPING (5 Second Delay)", command=self.start_process, bg="green", fg="white", font=("Segoe UI", 12, "bold"))
-        self.btn_run.pack(pady=10)
+        # Action Buttons
+        frame_actions = tk.Frame(self)
+        frame_actions.pack(pady=10)
+        
+        self.btn_run = tk.Button(frame_actions, text="START TYPING (5 Second Delay)", command=self.start_process, bg="green", fg="white", font=("Segoe UI", 12, "bold"))
+        self.btn_run.pack(side=tk.LEFT, padx=5)
+        
+        self.btn_abort = tk.Button(frame_actions, text="ABORT", command=self.abort_process, bg="red", fg="white", font=("Segoe UI", 12, "bold"), state='disabled')
+        self.btn_abort.pack(side=tk.LEFT, padx=5)
+
+    def abort_process(self):
+        self.log("\n[ABORT SIGNAL RECEIVED] Stopping after current name...")
+        self.abort_flag = True
 
     def log(self, message):
         self.log_text.config(state='normal')
@@ -142,12 +159,16 @@ class TeamsBruteApp(tk.Tk):
             return
             
         self.btn_run.config(state='disabled')
+        self.btn_abort.config(state='normal')
+        self.abort_flag = False
         self.log("Initializing...")
         
+        del_method = self.del_method_var.get()
+        
         # Run in a separate thread so UI doesn't freeze
-        threading.Thread(target=self.run_process, args=(name_col, delay, self.auto_add_var.get(), tabs_count), daemon=True).start()
+        threading.Thread(target=self.run_process, args=(name_col, delay, self.auto_add_var.get(), tabs_count, del_method), daemon=True).start()
 
-    def run_process(self, name_col, delay, auto_add, tabs_count):
+    def run_process(self, name_col, delay, auto_add, tabs_count, del_method):
         try:
             # 1. Read Excel
             self.log(f"Reading Excel file: {os.path.basename(self.filepath)}")
@@ -200,6 +221,10 @@ class TeamsBruteApp(tk.Tk):
             
             # Typing Loop
             for i, name in enumerate(names_to_type, 1):
+                if self.abort_flag:
+                    self.log("\n❌ PROCESS ABORTED BY USER!")
+                    break
+                    
                 self.log(f"[{i}/{total_names}] Typing: {name}")
                 
                 # Type the name quickly
@@ -215,16 +240,26 @@ class TeamsBruteApp(tk.Tk):
                 time.sleep(0.5)
                 
                 # CLEAR the text box in case the name was NOT found.
-                # If the name WAS found, the text box is empty and this does nothing.
-                # If the name was NOT found, this selects the text and deletes it.
-                # We use Shift+Home and Delete because Delete (forward delete) does not 
-                # delete chips in Teams if the box is empty, whereas Backspace might.
-                pyautogui.hotkey('shift', 'home')
-                pyautogui.press('delete')
+                if del_method == "Shift+Home (Default)":
+                    pyautogui.keyDown('shift')
+                    pyautogui.press('home')
+                    pyautogui.keyUp('shift')
+                    time.sleep(0.1)
+                    pyautogui.press('delete')
+                elif del_method == "Backspaces (Count)":
+                    for _ in range(len(name)):
+                        pyautogui.press('backspace')
+                elif del_method == "Ctrl+A, Delete":
+                    pyautogui.hotkey('ctrl', 'a')
+                    time.sleep(0.1)
+                    pyautogui.press('delete')
+                elif del_method == "None":
+                    pass
+                    
                 time.sleep(0.2)
                 
             # Auto Add logic
-            if auto_add:
+            if auto_add and not self.abort_flag:
                 self.log(f"\nTyping complete. Automatically pressing 'Add' (Tabbing {tabs_count} times)...")
                 time.sleep(1.0) # Small pause before navigating
                 for _ in range(tabs_count):
@@ -234,7 +269,7 @@ class TeamsBruteApp(tk.Tk):
                 pyautogui.press('enter')
                 self.log("✅ Pressed Add!")
                 messagebox.showinfo("Done", "Typing complete and 'Add' was pressed automatically!")
-            else:
+            elif not self.abort_flag:
                 self.log("\n✅ ALL DONE!")
                 self.log("Please review the selected names in Teams, and manually click the 'Add' button to finish.")
                 messagebox.showinfo("Done", "Typing complete! Please review the names in Teams and click Add.")
@@ -249,6 +284,7 @@ class TeamsBruteApp(tk.Tk):
             
         finally:
             self.btn_run.config(state='normal')
+            self.btn_abort.config(state='disabled')
 
 if __name__ == "__main__":
     app = TeamsBruteApp()
