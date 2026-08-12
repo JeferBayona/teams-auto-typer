@@ -56,6 +56,7 @@ class TeamsBruteApp(tk.Tk):
         self.geometry("600x650")
         
         self.filepath = None
+        self.abort_flag = False
         
         self.create_widgets()
 
@@ -97,6 +98,25 @@ class TeamsBruteApp(tk.Tk):
         self.entry_tabs.insert(0, "1")
         self.entry_tabs.grid(row=1, column=1, sticky='w', padx=5, pady=5)
 
+        self.auto_close_var = tk.BooleanVar(value=True)
+        chk_auto_close = tk.Checkbutton(frame_auto, text="Automatically press the 'Close' button on the final screen", variable=self.auto_close_var)
+        chk_auto_close.grid(row=2, column=0, columnspan=2, sticky='w', padx=5, pady=5)
+
+        tk.Label(frame_auto, text="Wait time before Close (seconds):").grid(row=3, column=0, sticky='w', padx=5, pady=5)
+        self.entry_close_delay = tk.Entry(frame_auto, width=5)
+        self.entry_close_delay.insert(0, "5")
+        self.entry_close_delay.grid(row=3, column=1, sticky='w', padx=5, pady=5)
+
+        tk.Label(frame_auto, text="Close Navigation Method:").grid(row=4, column=0, sticky='w', padx=5, pady=5)
+        self.close_nav_var = tk.StringVar(value="Shift+Tab (1x)")
+        self.drop_close_nav = tk.OptionMenu(frame_auto, self.close_nav_var, "Shift+Tab (1x)", "Shift+Tab (2x)", "Tab (Custom)")
+        self.drop_close_nav.grid(row=4, column=1, sticky='w', padx=5, pady=5)
+
+        tk.Label(frame_auto, text="If 'Tab (Custom)', number of Tabs:").grid(row=5, column=0, sticky='w', padx=5, pady=5)
+        self.entry_close_tabs = tk.Entry(frame_auto, width=5)
+        self.entry_close_tabs.insert(0, "1")
+        self.entry_close_tabs.grid(row=5, column=1, sticky='w', padx=5, pady=5)
+
         # Fail Safe Instructions
         frame_safe = tk.LabelFrame(self, text="⚠️ EMERGENCY STOP ⚠️", fg="red")
         frame_safe.pack(pady=10, padx=10, fill='x')
@@ -108,8 +128,17 @@ class TeamsBruteApp(tk.Tk):
         self.log_text.pack(padx=10, pady=5, fill='both', expand=True)
         
         # Action Button
-        self.btn_run = tk.Button(self, text="START TYPING (5 Second Delay)", command=self.start_process, bg="green", fg="white", font=("Segoe UI", 12, "bold"))
-        self.btn_run.pack(pady=10)
+        frame_action = tk.Frame(self)
+        frame_action.pack(pady=10)
+        self.btn_run = tk.Button(frame_action, text="START TYPING (5 Second Delay)", command=self.start_process, bg="green", fg="white", font=("Segoe UI", 12, "bold"))
+        self.btn_run.pack(side=tk.LEFT, padx=5)
+        
+        self.btn_abort = tk.Button(frame_action, text="ABORT", command=self.abort_process, bg="red", fg="white", font=("Segoe UI", 12, "bold"), state='disabled')
+        self.btn_abort.pack(side=tk.LEFT, padx=5)
+
+    def abort_process(self):
+        self.abort_flag = True
+        self.log("\n⚠️ ABORT REQUESTED! Stopping at the next available moment...")
 
     def log(self, message):
         self.log_text.config(state='normal')
@@ -141,13 +170,29 @@ class TeamsBruteApp(tk.Tk):
             messagebox.showerror("Error", "Number of tabs must be an integer.")
             return
             
+        try:
+            close_delay = float(self.entry_close_delay.get().strip())
+        except ValueError:
+            messagebox.showerror("Error", "Wait time before Close must be a number.")
+            return
+            
+        try:
+            close_tabs = int(self.entry_close_tabs.get().strip())
+        except ValueError:
+            messagebox.showerror("Error", "Number of Tabs (Custom) must be an integer.")
+            return
+            
         self.btn_run.config(state='disabled')
+        self.btn_abort.config(state='normal')
+        self.abort_flag = False
         self.log("Initializing...")
         
+        close_nav_method = self.close_nav_var.get()
+        
         # Run in a separate thread so UI doesn't freeze
-        threading.Thread(target=self.run_process, args=(name_col, delay, self.auto_add_var.get(), tabs_count), daemon=True).start()
+        threading.Thread(target=self.run_process, args=(name_col, delay, self.auto_add_var.get(), tabs_count, self.auto_close_var.get(), close_delay, close_nav_method, close_tabs), daemon=True).start()
 
-    def run_process(self, name_col, delay, auto_add, tabs_count):
+    def run_process(self, name_col, delay, auto_add, tabs_count, auto_close, close_delay, close_nav_method, close_tabs):
         try:
             # 1. Read Excel
             self.log(f"Reading Excel file: {os.path.basename(self.filepath)}")
@@ -208,6 +253,10 @@ class TeamsBruteApp(tk.Tk):
                 # Wait for Teams directory search to load the dropdown
                 time.sleep(delay)
                 
+                # Check for abort before clicking enter
+                if self.abort_flag:
+                    break
+                
                 # Press enter to select the top result
                 pyautogui.press('enter')
                 
@@ -224,7 +273,10 @@ class TeamsBruteApp(tk.Tk):
                 time.sleep(0.2)
                 
             # Auto Add logic
-            if auto_add:
+            if self.abort_flag:
+                self.log("\n❌ PROCESS ABORTED BY USER!")
+                messagebox.showwarning("Aborted", "Process was aborted by the user.")
+            elif auto_add:
                 self.log(f"\nTyping complete. Automatically pressing 'Add' (Tabbing {tabs_count} times)...")
                 time.sleep(1.0) # Small pause before navigating
                 for _ in range(tabs_count):
@@ -233,7 +285,39 @@ class TeamsBruteApp(tk.Tk):
                 
                 pyautogui.press('enter')
                 self.log("✅ Pressed Add!")
-                messagebox.showinfo("Done", "Typing complete and 'Add' was pressed automatically!")
+                
+                if auto_close and not self.abort_flag:
+                    self.log(f"Waiting {close_delay} seconds for MS Teams to process the additions...")
+                    # Loop sleep to allow abort during wait
+                    wait_time = 0
+                    while wait_time < close_delay:
+                        if self.abort_flag:
+                            self.log("\n❌ PROCESS ABORTED BY USER DURING WAIT!")
+                            break
+                        time.sleep(1)
+                        wait_time += 1
+                        
+                    if not self.abort_flag:
+                        self.log(f"Pressing 'Close' (Method: {close_nav_method})...")
+                        if close_nav_method == "Shift+Tab (1x)":
+                            pyautogui.hotkey('shift', 'tab')
+                            time.sleep(0.2)
+                        elif close_nav_method == "Shift+Tab (2x)":
+                            pyautogui.hotkey('shift', 'tab')
+                            time.sleep(0.2)
+                            pyautogui.hotkey('shift', 'tab')
+                            time.sleep(0.2)
+                        else:
+                            for _ in range(close_tabs):
+                                pyautogui.press('tab')
+                                time.sleep(0.2)
+                        pyautogui.press('enter')
+                        self.log("✅ Pressed Close!")
+                        messagebox.showinfo("Done", "Typing complete! 'Add' and 'Close' were pressed automatically!")
+                    else:
+                        messagebox.showwarning("Aborted", "Process aborted before Close button was pressed.")
+                else:
+                    messagebox.showinfo("Done", "Typing complete and 'Add' was pressed automatically!")
             else:
                 self.log("\n✅ ALL DONE!")
                 self.log("Please review the selected names in Teams, and manually click the 'Add' button to finish.")
@@ -249,6 +333,7 @@ class TeamsBruteApp(tk.Tk):
             
         finally:
             self.btn_run.config(state='normal')
+            self.btn_abort.config(state='disabled')
 
 if __name__ == "__main__":
     app = TeamsBruteApp()
