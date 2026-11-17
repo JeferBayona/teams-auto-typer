@@ -6,6 +6,7 @@ import xlrd
 import html5lib
 import bs4
 import pyautogui
+import pyperclip
 import threading
 import time
 import os
@@ -202,8 +203,10 @@ class TeamsBruteApp(tk.Tk):
             for i, name in enumerate(names_to_type, 1):
                 self.log(f"[{i}/{total_names}] Typing: {name}")
                 
-                # Type the name quickly
-                pyautogui.write(name, interval=0.02)
+                # Type the name using clipboard paste to support special characters like ñ, é, etc.
+                # pyautogui.write() does NOT support non-ASCII characters — it silently skips them.
+                pyperclip.copy(name)
+                pyautogui.hotkey('ctrl', 'v')
                 
                 # Wait for Teams directory search to load the dropdown
                 time.sleep(delay)
@@ -211,17 +214,20 @@ class TeamsBruteApp(tk.Tk):
                 # Press enter to select the top result
                 pyautogui.press('enter')
                 
-                # Tiny wait before the next name to ensure Teams processes the selection
-                time.sleep(0.5)
+                # Wait for Teams to process the selection (chip to appear or nothing to happen)
+                time.sleep(0.8)
                 
                 # CLEAR the text box in case the name was NOT found.
-                # If the name WAS found, the text box is empty and this does nothing.
-                # If the name was NOT found, this selects the text and deletes it.
-                # We use Shift+Home and Delete because Delete (forward delete) does not 
-                # delete chips in Teams if the box is empty, whereas Backspace might.
-                pyautogui.hotkey('shift', 'home')
-                pyautogui.press('delete')
-                time.sleep(0.2)
+                # Strategy: Shift+Home selects all text from cursor to start of line,
+                # then Delete removes it. Then a Backspace as backup in case anything remains.
+                # This does nothing if the name WAS found (box will be empty already).
+                pyautogui.hotkey('ctrl', 'a')  # Select all leftover text in the field
+                time.sleep(0.1)
+                pyautogui.press('delete')       # Delete it (forward-delete, won't remove chips)
+                time.sleep(0.1)
+                pyautogui.hotkey('shift', 'home')  # Belt-and-suspenders: select any straggler text
+                pyautogui.press('delete')           # Delete it
+                time.sleep(0.3)
                 
             # Auto Add logic
             if auto_add:
